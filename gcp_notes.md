@@ -1,3 +1,27 @@
+# Setup 
+## For using GitHub repository: EricRen-LBG
+1. Create ssh keys for using github   
+$ ssh-keygen -t ed25519 -C "Chi-Charles.Zhang@lloydsbanking.dev"
+
+2. Start the ssh agent and add the newly generated key   
+$ eval "$(ssh-agent -s)"   
+$ ssh-add ~/.ssh/id_ed25519 
+
+
+3. Upload the ssh public key to github
+Github: Settings --> SSH and GPg keys --> New SSH key
+
+## For using git
+$ git config --global user.name "Chi Zhang"
+$ git config --global user.email "chi-charles.zhang@lloydsbanking.com"
+
+# git lol to show branch history
+$ git config --global alias.lol "log --graph --decorate --pretty=oneline --abbrev-commit --all"
+
+To check all setting:   
+$ git config --list
+
+
 # == Load csv to BigQuery ==
 BigQuery Studio > Add > Load file
 
@@ -137,4 +161,3 @@ This component is a bit more complex than the previous one. Here's what's new:
 
 The packages_to_install parameter tells the component any external library dependencies for this container. In this case, you're using a library called emoji.
 This component returns a NamedTuple called Outputs. Notice that each of the strings in this tuple have keys: emoji_text and emoji. You'll use these in your next component to access the output.
-
