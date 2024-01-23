@@ -1,7 +1,7 @@
 # Setup 
 ## For using GitHub repository: EricRen-LBG
 1. Create ssh keys for using github   
-$ ssh-keygen -t ed25519 -C "Chi-Charles.Zhang@lloydsbanking.dev"
+$ ssh-keygen -t ed25519 -C "Chi-Charles.Zhang@lloydsbanking.com"
 
 2. Start the ssh agent and add the newly generated key   
 $ eval "$(ssh-agent -s)"   
