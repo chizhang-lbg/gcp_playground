@@ -69,6 +69,68 @@ gcloud storage ls
 gsutil -m cp -r gs://car_damage_lab_images/* gs://${BUCKET}
 
 
+# Configure your default region to us-central1 to use the Vertex AI models
+gcloud config set compute/region us-central1
+
+
+# PostgreSQL
+# Install the PostgreSQL client software on the deployed VM
+# Note: First time the SSH connection to the VM can take longer since the process includes creation of RSA key for secure connection and propagating the public part of the key to the project
+gcloud compute ssh instance-1 --zone=us-central1-b
+#Install the software running command inside the VM:
+sudo apt-get update
+sudo apt-get install --yes postgresql-client 
+#Connect to the primary instance from the VM using psql.
+#Use the previously noted $PGASSWORD and the cluster name to connect to AlloyDB from the GCE VM:
+export PGPASSWORD=PG_PASSWORD    # here I used alloydbworkshop2023
+export PROJECT_ID=$(gcloud config get-value project)
+export REGION=us-central1
+export ADBCLUSTER=CLUSTER
+export INSTANCE_IP=$(gcloud alloydb instances describe $ADBCLUSTER-pr --cluster=$ADBCLUSTER --region=$REGION --format="value(ipAddress)")
+psql "host=$INSTANCE_IP user=postgres sslmode=require" 
+
+
+# Create a database with name "assistantdemo" via PostgreSQL
+psql "host=$INSTANCE_IP user=postgres" -c "CREATE DATABASE assistantdemo"  
+
+# Enable pgVector extension.
+psql "host=$INSTANCE_IP user=postgres dbname=assistantdemo" -c "CREATE EXTENSION vector"  
+
+# Install Python 
+# To continue we are going to use prepared Python scripts from GitHub repository but before doing that we need to install the required software.
+# In the GCE VM execute:
+sudo apt install -y git build-essential libssl-dev zlib1g-dev \
+libbz2-dev libreadline-dev libsqlite3-dev curl \
+libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+# In the GCE VM execute:
+curl https://pyenv.run | bash
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+exec "$SHELL"
+# Install Python 3.11.x.
+pyenv install 3.11.6
+pyenv global 3.11.6
+python -V
+
+
+# Create Service Account
+# Create a service account for the extension service and grant necessary privileges.
+# 1. Open another Cloud Shell tab using the sign "+" at the top
+# 2. In the new cloud shell tab execute:
+export PROJECT_ID=$(gcloud config get-value project)
+gcloud iam service-accounts create retrieval-identity
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:retrieval-identity@$PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/aiplatform.user"
+# 3. Close the tab by either execution command "exit" in the tab:
+exit
+
+
+
+
+
+
 
 # create a copy of the file
 gsutil cp gs://car_damage_lab_metadata/data.csv .
